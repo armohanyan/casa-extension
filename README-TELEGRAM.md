@@ -13,19 +13,17 @@
 - **Ձեզ** ուղարկելու համար: Թելեգրամում բացեք [@userinfobot](https://t.me/userinfobot), սկսեք (Start), նա կցույց տա ձեր **Id** — դա ձեր `TELEGRAM_CHAT_ID`-ն է։
 - **Խմբի/ալիքի** համար: Ավելացրեք ձեր բոտը խմբին/ալիքին, ապա օգտագործեք [@userinfobot](https://t.me/userinfobot) կամ [@getidsbot](https://t.me/getidsbot) խմբում — ստացված ID-ն (հաճախ բացասական, օր. `-1001234567890`) կլինի `TELEGRAM_CHAT_ID`։
 
-## 3. Deploy Vercel-ում (անվճար)
+## 3. Deploy Vercel-ում (միայն Node server-ը, ոչ ամբողջ extension-ը)
 
 1. Գրանցվեք [vercel.com](https://vercel.com) (GitHub-ով արագ է)։
-2. Սեղմեք **Add New** → **Project**։
-3. **Import** արեք այս պրոյեկտը (GitHub repo) կամ Vercel CLI-ով:
-   ```bash
-   cd "/Users/armenohanyan/Downloads/extension 2"
-   npx vercel
-   ```
-4. Պրոյեկտում մտեք **Settings** → **Environment Variables** և ավելացրեք:
+2. **Add New** → **Project** → **Import** արեք այս repo-ն։
+3. **Կարևոր:** **Root Directory** դրեք **`telegram-server`** (ոչ repo-ի root):  
+   Settings → General → Root Directory → `telegram-server` → Save.  
+   Այդպես Vercel-ը կdeploy-ի միայն Node server-ը, **npm run build** չի թողնի ամբողջ extension-ի համար։
+4. **Settings** → **Environment Variables** — ավելացրեք:
    - `TELEGRAM_BOT_TOKEN` = ձեր բոտի token (BotFather-ից)
    - `TELEGRAM_CHAT_ID` = chat/channel ID (userinfobot/getidsbot-ից)
-5. **Redeploy** արեք (Deployments → ... → Redeploy), որպեսզի env variables-ը կիրառվեն։
+5. **Deploy** (կամ Redeploy): build-ը կանցնի, որովհետև `telegram-server`-ում dependencies/build չկա։
 
 Deploy-ից հետո URL-ը կլինի մոտավորապես այսպիսին:
 `https://your-project-name.vercel.app/api/send-to-telegram`
@@ -39,4 +37,4 @@ Deploy-ից հետո URL-ը կլինի մոտավորապես այսպիսին:
 
 ## Այլընտրանք — այլ host
 
-Եթե Vercel չեք օգտագործում, կարող եք `api/send-to-telegram.js` logic-ը տեղափոխել ձեր Node.js/Express, Netlify Function, Cloudflare Worker և այլն: Պահանջը — POST body `{ message, imageLinks }` և env-ում `TELEGRAM_BOT_TOKEN` ու `TELEGRAM_CHAT_ID`:
+Եթե Vercel չեք օգտագործում, կարող եք `telegram-server/api/send-to-telegram.js` logic-ը տեղափոխել ձեր Node.js/Express, Netlify Function, Cloudflare Worker և այլն: Պահանջը — POST body `{ message, imageLinks }` և env-ում `TELEGRAM_BOT_TOKEN` ու `TELEGRAM_CHAT_ID`:

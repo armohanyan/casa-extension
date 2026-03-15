@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build / output
+dist/
+build/
+*.crx
+*.pem
+*.zip
+
+# Logs and debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.vercel
+
+# Environment (keep secrets out of repo)
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

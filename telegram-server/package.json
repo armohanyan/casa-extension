@@ -1,0 +1,6 @@
+{
+  "name": "casa-telegram-server",
+  "version": "1.0.0",
+  "description": "Minimal server: receives data from Casa Helper extension, forwards to Telegram",
+  "private": true
+}
