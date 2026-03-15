@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "sandia-ts": "git+https://github.com/tigrandivanyan/sandia-ts.git"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.8",
+    "@babel/preset-env": "^7.25.8",
+    "babel-loader": "^9.2.1",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.3",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}

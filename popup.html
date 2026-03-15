@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="hy">
+  <head>
+    <meta charset="utf-8" />
+    <title>Casa Helper</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        min-width: 280px;
+        font-family: system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+      h2 {
+        margin: 0 0 10px 0;
+        font-size: 15px;
+        color: #1a1a1a;
+      }
+      .status {
+        margin: 8px 0;
+        padding: 8px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        display: none;
+      }
+      .status.show {
+        display: block;
+      }
+      .status.success {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .status.error {
+        background: #ffebee;
+        color: #c62828;
+      }
+      .status.info {
+        background: #e3f2fd;
+        color: #1565c0;
+      }
+      .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      button {
+        padding: 10px 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      #btnTelegram {
+        background: #0088cc;
+        color: #fff;
+      }
+      #btnTelegram:hover:not(:disabled) {
+        background: #006699;
+      }
+      #btnCrm {
+        background: #2e7d32;
+        color: #fff;
+      }
+      #btnCrm:hover:not(:disabled) {
+        background: #1b5e20;
+      }
+      .preview {
+        margin: 10px 0;
+        padding: 8px;
+        background: #f5f5f5;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #555;
+        max-height: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>List.am — Casa Helper</h2>
+    <div id="status" class="status" role="alert"></div>
+    <div id="preview" class="preview" style="display: none;"></div>
+    <div class="btn-group">
+      <label for="telegramApiUrl" style="font-size: 12px; color: #666;">Թելեգրամ API հասցե (ձեր Vercel/սերվերի URL)</label>
+      <input id="telegramApiUrl" type="url" placeholder="https://your-app.vercel.app/api/send-to-telegram" style="width: 100%; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 12px;" />
+      <label for="crmUrl" style="font-size: 12px; color: #666;">CRM API հասցե (ըստ ցանկության)</label>
+      <input id="crmUrl" type="url" placeholder="https://crm.example.com/api/listings" style="width: 100%; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 12px;" />
+      <button id="btnTelegram" type="button">Ուղարկել Թելեգրամ</button>
+      <button id="btnCrm" type="button">Ուղարկել CRM</button>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
