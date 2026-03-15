@@ -8,22 +8,27 @@
 const TELEGRAM_BASE = 'https://api.telegram.org/bot';
 const MEDIA_GROUP_LIMIT = 10;
 
-function corsHeaders() {
-  return {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  };
+function setCors(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
+function sendJson(res, status, body) {
+  setCors(res);
+  res.setHeader('Content-Type', 'application/json');
+  res.status(status).end(JSON.stringify(body));
 }
 
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).setHeader(corsHeaders()).end();
+    setCors(res);
+    res.status(204).end();
     return;
   }
 
   if (req.method !== 'POST') {
-    res.status(405).setHeader(corsHeaders()).json({ error: 'Method not allowed' });
+    sendJson(res, 405, { error: 'Method not allowed' });
     return;
   }
 
@@ -31,7 +36,7 @@ module.exports = async function handler(req, res) {
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
   if (!token || !chatId) {
-    res.status(500).setHeader(corsHeaders()).json({
+    sendJson(res, 500, {
       error: 'Server misconfiguration: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set',
     });
     return;
@@ -41,7 +46,7 @@ module.exports = async function handler(req, res) {
   try {
     body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
   } catch {
-    res.status(400).setHeader(corsHeaders()).json({ error: 'Invalid JSON body' });
+    sendJson(res, 400, { error: 'Invalid JSON body' });
     return;
   }
 
@@ -49,13 +54,13 @@ module.exports = async function handler(req, res) {
   const baseUrl = `${TELEGRAM_BASE}${token}`;
 
   try {
-    if (message.trim()) {
+    if (message && String(message).trim()) {
       const msgRes = await fetch(`${baseUrl}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chat_id: chatId,
-          text: message.trim(),
+          text: String(message).trim(),
           disable_web_page_preview: true,
         }),
       });
@@ -65,7 +70,8 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const validUrls = imageLinks.filter((url) => typeof url === 'string' && url.startsWith('http'));
+    const validUrls = (Array.isArray(imageLinks) ? imageLinks : [])
+      .filter((url) => typeof url === 'string' && url.startsWith('http'));
     for (let i = 0; i < validUrls.length; i += MEDIA_GROUP_LIMIT) {
       const batch = validUrls.slice(i, i + MEDIA_GROUP_LIMIT);
       const media = batch.map((url) => ({ type: 'photo', media: url }));
@@ -82,11 +88,9 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    res.status(200).setHeader(corsHeaders()).json({ success: true });
+    sendJson(res, 200, { success: true });
   } catch (err) {
     console.error('Telegram send error:', err);
-    res.status(500).setHeader(corsHeaders()).json({
-      error: err.message || 'Failed to send to Telegram',
-    });
+    sendJson(res, 500, { error: err.message || 'Failed to send to Telegram' });
   }
 };

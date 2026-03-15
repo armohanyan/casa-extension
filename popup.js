@@ -1,3 +1,5 @@
+const DEFAULT_TELEGRAM_API_URL = 'https://casa-extension.vercel.app/api/send-to-telegram';
+
 const statusEl = document.getElementById('status');
 const previewEl = document.getElementById('preview');
 const btnTelegram = document.getElementById('btnTelegram');
@@ -8,7 +10,8 @@ const crmUrlInput = document.getElementById('crmUrl');
 let scrapedData = null;
 
 function getTelegramApiUrl() {
-  return (telegramApiUrlInput?.value || '').trim();
+  const value = (telegramApiUrlInput?.value || '').trim();
+  return value || DEFAULT_TELEGRAM_API_URL;
 }
 
 function getCrmApiUrl() {
@@ -33,7 +36,7 @@ function loadData() {
   hideStatus();
   setLoading(true);
   chrome.storage.local.get(['telegramApiUrl', 'crmApiUrl'], (result) => {
-    if (result.telegramApiUrl && telegramApiUrlInput) telegramApiUrlInput.value = result.telegramApiUrl;
+    if (telegramApiUrlInput) telegramApiUrlInput.value = result.telegramApiUrl || DEFAULT_TELEGRAM_API_URL;
     if (result.crmApiUrl && crmUrlInput) crmUrlInput.value = result.crmApiUrl;
   });
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -68,10 +71,6 @@ function loadData() {
 function sendToTelegram() {
   if (!scrapedData) return;
   const apiUrl = getTelegramApiUrl();
-  if (!apiUrl) {
-    showStatus('Խնդրում ենք մուտքագրել Թելեգրամ API հասցեն (ձեր Vercel URL)։', 'error');
-    return;
-  }
   chrome.storage.local.set({ telegramApiUrl: apiUrl });
   setLoading(true);
   showStatus('Ուղարկվում է…', 'info');
