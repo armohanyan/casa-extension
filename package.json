@@ -1,7 +1,5 @@
 {
-  "dependencies": {
-    "sandia-ts": "git+https://github.com/tigrandivanyan/sandia-ts.git"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.25.8",
     "@babel/preset-env": "^7.25.8",
