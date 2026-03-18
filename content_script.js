@@ -38,6 +38,50 @@ function looksLikeImageUrl(url) {
   return /\.(png|jpe?g|webp|gif)(\?.*)?$/i.test(url) || url.includes('/img/');
 }
 
+function extractImagesFromJsonLd() {
+  const out = [];
+  const nodes = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
+  for (const node of nodes) {
+    const text = (node.textContent || '').trim();
+    if (!text) continue;
+    try {
+      const json = JSON.parse(text);
+      const stack = Array.isArray(json) ? [...json] : [json];
+      while (stack.length) {
+        const cur = stack.pop();
+        if (!cur) continue;
+        if (typeof cur === 'string') continue;
+        if (Array.isArray(cur)) {
+          for (const v of cur) stack.push(v);
+          continue;
+        }
+        if (cur.image) stack.push(cur.image);
+        if (cur.contentUrl) stack.push(cur.contentUrl);
+        if (cur.url) stack.push(cur.url);
+        for (const v of Object.values(cur)) {
+          if (v && typeof v === 'object') stack.push(v);
+        }
+      }
+      // Second pass: collect any string values that look like image URLs.
+      const collect = (v) => {
+        if (!v) return;
+        if (typeof v === 'string') {
+          const n = normalizeUrl(v);
+          if (n && looksLikeImageUrl(n)) out.push(n);
+        } else if (Array.isArray(v)) {
+          v.forEach(collect);
+        } else if (typeof v === 'object') {
+          Object.values(v).forEach(collect);
+        }
+      };
+      collect(json);
+    } catch {
+      // ignore bad JSON-LD
+    }
+  }
+  return out;
+}
+
 function getScrapedData() {
   const bodyEl = document.querySelector('#pcontent > div > div.body');
   const message = bodyEl ? bodyEl.textContent.trim() : '';
@@ -45,6 +89,14 @@ function getScrapedData() {
   const contentRoot = document.querySelector('#pcontent');
 
   const imageUrlSet = new Set();
+
+  // 0) Common page-level hints.
+  const ogImage = normalizeUrl(document.querySelector('meta[property="og:image"]')?.getAttribute('content'));
+  if (ogImage && looksLikeImageUrl(ogImage)) imageUrlSet.add(ogImage);
+  const imageSrc = normalizeUrl(document.querySelector('link[rel="image_src"]')?.getAttribute('href'));
+  if (imageSrc && looksLikeImageUrl(imageSrc)) imageUrlSet.add(imageSrc);
+
+  for (const url of extractImagesFromJsonLd()) imageUrlSet.add(url);
 
   if (contentRoot) {
     // 1) Prefer gallery anchors (often point to the "opened" large image).
