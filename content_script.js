@@ -2,18 +2,71 @@
  * Scrapes listing data from list.am item page.
  * Returns data only; sending is handled by popup (Telegram or CRM).
  */
+function pickLargestFromSrcset(srcset) {
+  if (!srcset || typeof srcset !== 'string') return null;
+  // Example: "https://... 320w, https://... 640w"
+  const candidates = srcset
+    .split(',')
+    .map((chunk) => chunk.trim())
+    .map((chunk) => {
+      const parts = chunk.split(/\s+/).filter(Boolean);
+      const url = parts[0];
+      const sizeToken = parts[1] || '';
+      const widthMatch = sizeToken.match(/^(\d+)w$/);
+      const densityMatch = sizeToken.match(/^(\d+(?:\.\d+)?)x$/);
+      const score = widthMatch ? Number(widthMatch[1]) : densityMatch ? Number(densityMatch[1]) * 1000 : 0;
+      return { url, score };
+    })
+    .filter((c) => c.url);
+  if (!candidates.length) return null;
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates[0].url || null;
+}
+
+function normalizeUrl(url) {
+  if (!url || typeof url !== 'string') return null;
+  try {
+    return new URL(url, window.location.href).toString();
+  } catch {
+    return null;
+  }
+}
+
+function looksLikeImageUrl(url) {
+  if (!url) return false;
+  // Keep it permissive: some CDNs omit extensions, but most gallery links keep them.
+  return /\.(png|jpe?g|webp|gif)(\?.*)?$/i.test(url) || url.includes('/img/');
+}
+
 function getScrapedData() {
   const bodyEl = document.querySelector('#pcontent > div > div.body');
   const message = bodyEl ? bodyEl.textContent.trim() : '';
-  // All images in listing content (gallery can be .p > div > img or nested)
+  // Try to collect the best-available (usually original / large) image URLs.
   const contentRoot = document.querySelector('#pcontent');
-  const imageLinks = contentRoot
-    ? Array.from(contentRoot.querySelectorAll('img'))
-        .filter((e) => e.src && !e.src.includes('item'))
-        .map((e) => e.src)
-    : [];
-  // Deduplicate by URL (thumbnails and full-size may repeat)
-  const uniqueImageLinks = [...new Set(imageLinks)];
+
+  const imageUrlSet = new Set();
+
+  if (contentRoot) {
+    // 1) Prefer gallery anchors (often point to the "opened" large image).
+    for (const a of Array.from(contentRoot.querySelectorAll('a[href]'))) {
+      const href = normalizeUrl(a.getAttribute('href'));
+      if (href && looksLikeImageUrl(href)) imageUrlSet.add(href);
+    }
+
+    // 2) Use best candidate from each <img>.
+    for (const img of Array.from(contentRoot.querySelectorAll('img'))) {
+      const srcsetPick = pickLargestFromSrcset(img.getAttribute('srcset'));
+      const dataPick =
+        img.getAttribute('data-src') ||
+        img.getAttribute('data-original') ||
+        img.getAttribute('data-large') ||
+        img.getAttribute('data-full');
+      const chosen = normalizeUrl(srcsetPick || dataPick || img.currentSrc || img.src);
+      if (chosen && looksLikeImageUrl(chosen)) imageUrlSet.add(chosen);
+    }
+  }
+
+  const uniqueImageLinks = Array.from(imageUrlSet);
   const pageUrl = window.location.href;
 
   return {
