@@ -18,4 +18,4 @@ Your URL will be: `https://your-project.vercel.app/api/send-to-telegram`
 
 Paste that URL in the extension’s “Թելեգրամ API հասցե” field.
 
-No `npm install` or `npm run build` is run for this project (no dependencies).
+Vercel runs `npm install` on deploy (`sharp` is used to crop listing watermarks off photos before sending).
