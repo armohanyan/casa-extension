@@ -1,0 +1,11 @@
+# Telegram server (Vercel deploy root) — also covered by repo root .gitignore
+
+node_modules/
+dist/
+build/
+
+.env
+.env.local
+.env.*.local
+
+.vercel/

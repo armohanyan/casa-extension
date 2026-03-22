@@ -4,21 +4,34 @@ node_modules/
 # Build / output
 dist/
 build/
+out/
+coverage/
+
+# Chrome extension packaging (local builds / store uploads)
 *.crx
 *.pem
 *.zip
 
-# Logs and debug
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.npm
-.vercel
+pnpm-debug.log*
+lerna-debug.log*
+*.log
 
-# Environment (keep secrets out of repo)
+# Environment (secrets)
 .env
 .env.local
 .env.*.local
+
+# Vercel (CLI project link; keep out of repo)
+.vercel/
+
+# Caches & tooling
+.npm
+*.tsbuildinfo
+.cache/
 
 # OS
 .DS_Store

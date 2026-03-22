@@ -1,0 +1,13 @@
+# Chrome extension — also covered by repo root .gitignore
+
+node_modules/
+dist/
+build/
+
+*.crx
+*.pem
+*.zip
+
+.env
+.env.local
+.env.*.local
